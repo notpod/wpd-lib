@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+# SharpDevelop 4.2.0.8783
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wpd-lib", "wpd-lib\wpd-lib.csproj", "{7C07331D-5E7D-45B0-BE40-510535606FFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wpd-demo-app", "wpd-demo-app\wpd-demo-app.csproj", "{0188793B-E231-4AB1-AAB5-7F2AD2149932}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7C07331D-5E7D-45B0-BE40-510535606FFA}.Debug|x86.Build.0 = Debug|x86
+		{7C07331D-5E7D-45B0-BE40-510535606FFA}.Debug|x86.ActiveCfg = Debug|x86
+		{7C07331D-5E7D-45B0-BE40-510535606FFA}.Release|x86.Build.0 = Release|x86
+		{7C07331D-5E7D-45B0-BE40-510535606FFA}.Release|x86.ActiveCfg = Release|x86
+		{0188793B-E231-4AB1-AAB5-7F2AD2149932}.Debug|x86.Build.0 = Debug|x86
+		{0188793B-E231-4AB1-AAB5-7F2AD2149932}.Debug|x86.ActiveCfg = Debug|x86
+		{0188793B-E231-4AB1-AAB5-7F2AD2149932}.Release|x86.Build.0 = Release|x86
+		{0188793B-E231-4AB1-AAB5-7F2AD2149932}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+EndGlobal
