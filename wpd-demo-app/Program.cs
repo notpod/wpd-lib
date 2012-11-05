@@ -7,16 +7,33 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
-
+using WindowsPortableDevicesLib;
 namespace wpd_demo_app
 {
     class Program
     {
+        
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            StandardWindowsPortableDeviceService service = new StandardWindowsPortableDeviceService();
             
-            // TODO: Implement Functionality Here
+            Console.WriteLine("Available devices:");
+            
+            string[] ids = service.DeviceIDs;
+            
+            if(ids.Length == 0) {
+                
+                Console.WriteLine("No devices.");
+            } else {
+                
+                int index = 0;
+                foreach(string id in ids) {
+                    
+                    Console.WriteLine("{0} {1}", ++index, id);
+                }
+            }
+            
+            
             
             Console.Write("Press any key to continue . . . ");
             Console.ReadKey(true);

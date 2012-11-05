@@ -16,16 +16,19 @@ namespace WindowsPortableDevicesLib
         
         public string[] DeviceIDs {
             get {
-                portableDeviceManager.RefreshDeviceList();
 
-                // Determine how many WPD devices are connected
-                var deviceIds = new string[1];
-                uint count = 1;
-                portableDeviceManager.GetDevices(ref deviceIds[0], ref count);
+                portableDeviceManager.RefreshDeviceList();  
+                
+                uint numberOfDevices = 0;
+                portableDeviceManager.GetDevices(null, ref numberOfDevices);
 
-                // Retrieve the device id for each connected device
-                deviceIds = new string[count];
-                portableDeviceManager.GetDevices(ref deviceIds[0], ref count);
+                if (numberOfDevices == 0)
+                {
+                    return new string[0];
+                }
+                
+                string[] deviceIds = new string[numberOfDevices];
+                portableDeviceManager.GetDevices(deviceIds, ref numberOfDevices);
                 
                 return deviceIds;
             }
