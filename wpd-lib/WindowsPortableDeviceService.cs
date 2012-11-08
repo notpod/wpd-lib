@@ -16,7 +16,7 @@ namespace WindowsPortableDevicesLib
     public interface WindowsPortableDeviceService
     {
         
-        List<WindowsPortableDevice> Devices { get; }
+        IList<WindowsPortableDevice> Devices { get; }
         
     }
 

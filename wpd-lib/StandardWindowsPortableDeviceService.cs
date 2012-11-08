@@ -15,7 +15,7 @@ namespace WindowsPortableDevicesLib
             
         }
         
-        public List<WindowsPortableDevice> Devices {
+        public IList<WindowsPortableDevice> Devices {
             get {
 
                 portableDeviceManager.RefreshDeviceList();  
