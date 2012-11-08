@@ -230,6 +230,24 @@ namespace WindowsPortableDevicesLib.Domain
             return values;
         }
         
+        public override string ToString() {
+            
+            bool shouldDisconnect = false;
+            if(device == null) {
+            
+                Connect();
+                shouldDisconnect = true;
+            }
+            string toString = FriendlyName;
+            
+            if(shouldDisconnect) {
+                
+                Disconnect();
+            }
+            
+            return toString;
+        }
+        
         private static void EnumerateContents(ref IPortableDeviceContent content,
                                               PortableDeviceFolder parent)
         {
