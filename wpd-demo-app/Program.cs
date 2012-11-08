@@ -8,7 +8,10 @@
  */
 using System;
 using WindowsPortableDevicesLib;
-namespace wpd_demo_app
+using WindowsPortableDevicesLib.Domain;
+using System.Collections.Generic;
+
+namespace WindowsPortableDevicesLib
 {
     class Program
     {
@@ -19,17 +22,19 @@ namespace wpd_demo_app
             
             Console.WriteLine("Available devices:");
             
-            string[] ids = service.DeviceIDs;
+            List<WindowsPortableDevice> devices = service.Devices;
             
-            if(ids.Length == 0) {
+            if(devices.Count == 0) {
                 
                 Console.WriteLine("No devices.");
             } else {
                 
                 int index = 0;
-                foreach(string id in ids) {
+                foreach(WindowsPortableDevice device in devices) {
                     
-                    Console.WriteLine("{0} {1}", ++index, id);
+                    device.Connect();
+                    Console.WriteLine("{0} {1} {2}", ++index, device.FriendlyName, device.DeviceID);
+                    device.Disconnect();
                 }
             }
             

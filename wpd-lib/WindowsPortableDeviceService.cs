@@ -8,6 +8,7 @@
  */
 using System;
 using WindowsPortableDevicesLib.Domain;
+using System.Collections.Generic;
 
 namespace WindowsPortableDevicesLib
 {
@@ -15,9 +16,7 @@ namespace WindowsPortableDevicesLib
     public interface WindowsPortableDeviceService
     {
         
-        string[] DeviceIDs { get; }
-        
-        WindowsPortableDevice ConnectDevice(string deviceID);
+        List<WindowsPortableDevice> Devices { get; }
         
     }
 

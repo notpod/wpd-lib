@@ -1,6 +1,7 @@
 ﻿using System;
 using WindowsPortableDevicesLib.Domain;
 using PortableDeviceApiLib;
+using System.Collections.Generic;
 
 namespace WindowsPortableDevicesLib
 {
@@ -14,7 +15,7 @@ namespace WindowsPortableDevicesLib
             
         }
         
-        public string[] DeviceIDs {
+        public List<WindowsPortableDevice> Devices {
             get {
 
                 portableDeviceManager.RefreshDeviceList();  
@@ -24,19 +25,21 @@ namespace WindowsPortableDevicesLib
 
                 if (numberOfDevices == 0)
                 {
-                    return new string[0];
+                    return new List<WindowsPortableDevice>();
                 }
                 
                 string[] deviceIds = new string[numberOfDevices];
                 portableDeviceManager.GetDevices(deviceIds, ref numberOfDevices);
                 
-                return deviceIds;
+                List<WindowsPortableDevice> devices = new List<WindowsPortableDevice>();
+                foreach(string deviceId in deviceIds) {
+                    
+                    devices.Add(new WindowsPortableDevice(deviceId));
+                }
+                
+                return devices;
             }
         }
-        
-        public WindowsPortableDevice ConnectDevice(string deviceID)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }
