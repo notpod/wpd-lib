@@ -94,15 +94,18 @@ namespace WindowsPortableDevicesLib.Domain
             this.device = null;
         }
         
-        public PortableDeviceFolder GetContents()
+        public PortableDeviceFolder GetContents(PortableDeviceFolder parent = null)
         {
             ValidateConnection();
-            
             var root = new PortableDeviceFolder("DEVICE", "DEVICE");
-
+            if (parent != null)
+            {
+                root = parent;    
+            }
+            
             IPortableDeviceContent content;
             device.Content(out content);
-            EnumerateContents(ref content, root);
+            EnumerateContentsOfParent(ref content, root);
 
             return root;
         }
@@ -248,7 +251,7 @@ namespace WindowsPortableDevicesLib.Domain
             return toString;
         }
         
-        private static void EnumerateContents(ref IPortableDeviceContent content,
+        private static void EnumerateContentsRecursive(ref IPortableDeviceContent content,
                                               PortableDeviceFolder parent)
         {
             // Get the properties of the object
@@ -273,8 +276,35 @@ namespace WindowsPortableDevicesLib.Domain
 
                     if (currentObject is PortableDeviceFolder)
                     {
-                        EnumerateContents(ref content, (PortableDeviceFolder) currentObject);
+                        EnumerateContentsRecursive(ref content, (PortableDeviceFolder)currentObject);
                     }
+                }
+            } while (fetched > 0);
+        }
+
+        private static void EnumerateContentsOfParent(ref IPortableDeviceContent content,
+                                              PortableDeviceFolder parent)
+        {
+            // Get the properties of the object
+            IPortableDeviceProperties properties;
+            content.Properties(out properties);
+
+            // Enumerate the items contained by the current object
+            IEnumPortableDeviceObjectIDs objectIds;
+            content.EnumObjects(0, parent.Id, null, out objectIds);
+
+            uint fetched = 0;
+            do
+            {
+                string objectId;
+
+                objectIds.Next(1, out objectId, ref fetched);
+                if (fetched > 0)
+                {
+                    var currentObject = WrapObject(properties, objectId);
+
+                    parent.Files.Add(currentObject);
+
                 }
             } while (fetched > 0);
         }
