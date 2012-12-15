@@ -10,6 +10,8 @@ using System;
 using PortableDeviceApiLib;
 using Common.Logging;
 using System.IO;
+using System.Linq;
+using WindowsPortableDevicesLib;
 
 namespace WindowsPortableDevicesLib.Domain
 {
@@ -108,6 +110,42 @@ namespace WindowsPortableDevicesLib.Domain
             EnumerateContentsOfParent(ref content, root);
 
             return root;
+        }
+
+        public PortableDeviceFolder GetFolderForPath(string path)
+        {
+
+            l.DebugFormat("Using path: {0}", path);
+
+            string[] pathSegments = path.Split('\\');
+
+            PortableDeviceFolder currentFolder = GetContents();
+            bool folderFound = true;
+            foreach (string segment in pathSegments)
+            {
+                var folders = from f in currentFolder.Files where f.GetType() == typeof(PortableDeviceFolder) select f;
+
+                foreach (PortableDeviceFolder folder in folders)
+                {
+                    l.DebugFormat("Checking subfolder {0} of {1}", folder.Name, currentFolder.Name);
+
+                    if (folder.Name.Equals(segment))
+                    {
+                        l.DebugFormat("Folder matching {0} found.", segment);
+                        currentFolder = folder;
+                        continue;
+                    }
+                }
+                folderFound = false;
+                break;
+            }
+
+            if (!folderFound)
+            {
+                throw new PathNotFoundException("Unable to find the path {0} on device {1}.", path, this.deviceID);
+            }
+
+            return currentFolder;
         }
         
         public void GetFile(PortableDeviceFile file, string saveToPath)

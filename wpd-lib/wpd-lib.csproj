@@ -65,6 +65,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PathNotFoundException.cs" />
     <Compile Include="PortableDeviceFile.cs" />
     <Compile Include="PortableDeviceFolder.cs" />
     <Compile Include="PortableDeviceObject.cs" />
