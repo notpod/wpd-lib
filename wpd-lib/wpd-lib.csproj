@@ -65,9 +65,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DevicePropertyKeys.cs" />
     <Compile Include="PathNotFoundException.cs" />
     <Compile Include="PortableDeviceFile.cs" />
     <Compile Include="PortableDeviceFolder.cs" />
+    <Compile Include="DeviceGUIDS.cs" />
     <Compile Include="PortableDeviceObject.cs" />
     <Compile Include="StandardWindowsPortableDeviceService.cs" />
     <Compile Include="WindowsPortableDevice.cs" />
@@ -76,6 +78,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="PortableDeviceConnectApiLib">
+      <Guid>{8FE73967-AAE2-4D77-9921-0C4962631056}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>
