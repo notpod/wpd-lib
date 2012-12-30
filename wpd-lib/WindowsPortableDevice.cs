@@ -50,7 +50,7 @@ namespace WindowsPortableDevicesLib.Domain
                 // Retrieve the values for the properties
                 IPortableDeviceValues propertyValues;
                 properties.GetValues("DEVICE", null, out propertyValues);
-
+                                
                 // Identify the property to retrieve
                 var property = new _tagpropertykey();
                 property.fmtid = new Guid(0x26D4979A, 0xE643, 0x4626, 0x9E, 0x2B,
@@ -377,12 +377,16 @@ namespace WindowsPortableDevicesLib.Domain
             var functionalType = new Guid(0x99ED0160, 0x17FF, 0x4C44, 0x9D, 0x98,
                                           0x1D, 0x7A, 0x6F, 0x94, 0x19, 0x21);
 
+
+            string uniqueID;
+            values.GetStringValue(DevicePropertyKeys.WPD_OBJECT_PERSISTENT_UNIQUE_ID, out uniqueID);
+
             if (contentType == folderType  || contentType == functionalType)
             {
-                return new PortableDeviceFolder(objectId, name);
+                return new PortableDeviceFolder(uniqueID, name);
             }
 
-            return new PortableDeviceFile(objectId, name);
+            return new PortableDeviceFile(uniqueID, name);
         }
     }
 }
