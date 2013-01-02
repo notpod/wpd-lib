@@ -15,11 +15,14 @@ namespace WindowsPortableDevicesLib.Domain
     /// </summary>
     public class PortableDeviceObject
     {
+                
         protected PortableDeviceObject(string id, string name)
         {
             this.Id = id;
             this.Name = name;
         }
+
+        public string PersistentId { get; set; }
 
         public string Id { get; private set; }
 

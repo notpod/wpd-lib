@@ -376,17 +376,24 @@ namespace WindowsPortableDevicesLib.Domain
                                       0xE1, 0x77, 0x05, 0xA0, 0x5F, 0x85);
             var functionalType = new Guid(0x99ED0160, 0x17FF, 0x4C44, 0x9D, 0x98,
                                           0x1D, 0x7A, 0x6F, 0x94, 0x19, 0x21);
-
-
+            
             string uniqueID;
             values.GetStringValue(DevicePropertyKeys.WPD_OBJECT_PERSISTENT_UNIQUE_ID, out uniqueID);
 
+            PortableDeviceObject deviceObject = null;
+
             if (contentType == folderType  || contentType == functionalType)
             {
-                return new PortableDeviceFolder(uniqueID, name);
+                deviceObject = new PortableDeviceFolder(objectId, name);
+                
+            } else {
+                deviceObject = new PortableDeviceFile(objectId, name);
             }
-
-            return new PortableDeviceFile(uniqueID, name);
+            
+            deviceObject.PersistentId = uniqueID;
+            
+            return deviceObject;
+            
         }
     }
 }
