@@ -20,50 +20,18 @@ namespace WindowsPortableDevicesLib.Domain
     {
         private ILog l = LogManager.GetLogger(typeof(WindowsPortableDevice));
         
-        private string deviceID;
-        
         private PortableDeviceClass device;
         
         public WindowsPortableDevice(string deviceID)
         {
-            this.deviceID = deviceID;
+            this.DeviceID = deviceID;
         }
-        
-        public string DeviceID {
-            
-            get { return deviceID; }
 
-        }
-        
-        public string FriendlyName
-        {
-            get
-            {
-                ValidateConnection();
+        public string DeviceID { get; set; }
 
-                // Retrieve the properties of the device
-                IPortableDeviceContent content;
-                IPortableDeviceProperties properties;
-                device.Content(out content);
-                content.Properties(out properties);
+        public string FriendlyName { get; set; }
 
-                // Retrieve the values for the properties
-                IPortableDeviceValues propertyValues;
-                properties.GetValues("DEVICE", null, out propertyValues);
-                                
-                // Identify the property to retrieve
-                var property = new _tagpropertykey();
-                property.fmtid = new Guid(0x26D4979A, 0xE643, 0x4626, 0x9E, 0x2B,
-                                          0x73, 0x6D, 0xC0, 0xC9, 0x2F, 0xDC);
-                property.pid = 12;
-
-                // Retrieve the friendly name
-                string propertyValue;
-                propertyValues.GetStringValue(ref property, out propertyValue);
-
-                return propertyValue;
-            }
-        }
+        public int DeviceType { get; set; }
         
         void ValidateConnection()
         {
@@ -82,7 +50,40 @@ namespace WindowsPortableDevicesLib.Domain
             }
             var clientInfo = (IPortableDeviceValues) new PortableDeviceTypesLib.PortableDeviceValuesClass();
             device = new PortableDeviceClass();
-            device.Open(deviceID, clientInfo);
+            device.Open(DeviceID, clientInfo);
+
+            GetPropertiesFromDevice();
+
+        }
+
+        private void GetPropertiesFromDevice()
+        {
+            // Retrieve the properties of the device
+            IPortableDeviceContent content;
+            IPortableDeviceProperties properties;
+            device.Content(out content);
+            content.Properties(out properties);
+
+            // Retrieve the values for the properties
+            IPortableDeviceValues propertyValues;
+            properties.GetValues("DEVICE", null, out propertyValues);
+
+            // Identify the property to retrieve
+            var property = new _tagpropertykey();
+            property.fmtid = new Guid(0x26D4979A, 0xE643, 0x4626, 0x9E, 0x2B,
+                                      0x73, 0x6D, 0xC0, 0xC9, 0x2F, 0xDC);
+            property.pid = 12;
+
+            // Retrieve the friendly name
+            string deviceName;
+            propertyValues.GetStringValue(ref property, out deviceName);
+            this.FriendlyName = deviceName;
+
+
+            // Retrieve the type of device
+            int deviceType;
+            propertyValues.GetSignedIntegerValue(ref DevicePropertyKeys.WPD_DEVICE_TYPE, out deviceType);
+            this.DeviceType = deviceType;
         }
 
         public void Disconnect()
@@ -142,7 +143,7 @@ namespace WindowsPortableDevicesLib.Domain
 
             if (!folderFound)
             {
-                throw new PathNotFoundException("Unable to find the path {0} on device {1}.", path, this.deviceID);
+                throw new PathNotFoundException("Unable to find the path {0} on device {1}.", path, this.DeviceID);
             }
 
             return currentFolder;
@@ -395,5 +396,7 @@ namespace WindowsPortableDevicesLib.Domain
             return deviceObject;
             
         }
+
+        
     }
 }
