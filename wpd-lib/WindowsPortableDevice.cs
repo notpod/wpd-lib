@@ -112,43 +112,7 @@ namespace WindowsPortableDevicesLib.Domain
 
             return root;
         }
-
-        public PortableDeviceFolder GetFolderForPath(string path)
-        {
-
-            l.DebugFormat("Using path: {0}", path);
-
-            string[] pathSegments = path.Split('\\');
-
-            PortableDeviceFolder currentFolder = GetContents();
-            bool folderFound = true;
-            foreach (string segment in pathSegments)
-            {
-                var folders = from f in currentFolder.Files where f.GetType() == typeof(PortableDeviceFolder) select f;
-
-                foreach (PortableDeviceFolder folder in folders)
-                {
-                    l.DebugFormat("Checking subfolder {0} of {1}", folder.Name, currentFolder.Name);
-
-                    if (folder.Name.Equals(segment))
-                    {
-                        l.DebugFormat("Folder matching {0} found.", segment);
-                        currentFolder = folder;
-                        continue;
-                    }
-                }
-                folderFound = false;
-                break;
-            }
-
-            if (!folderFound)
-            {
-                throw new PathNotFoundException("Unable to find the path {0} on device {1}.", path, this.DeviceID);
-            }
-
-            return currentFolder;
-        }
-        
+                        
         public void GetFile(PortableDeviceFile file, string saveToPath)
         {
             IPortableDeviceContent content;
@@ -380,7 +344,7 @@ namespace WindowsPortableDevicesLib.Domain
             
             string uniqueID;
             values.GetStringValue(DevicePropertyKeys.WPD_OBJECT_PERSISTENT_UNIQUE_ID, out uniqueID);
-
+                        
             PortableDeviceObject deviceObject = null;
 
             if (contentType == folderType  || contentType == functionalType)
