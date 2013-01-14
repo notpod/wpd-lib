@@ -253,6 +253,46 @@ namespace WindowsPortableDevicesLib.Domain
             
             return toString;
         }
+
+        public PortableDeviceFolder GetFolder(string parentPersistentID, string persistentID)
+        {
+
+            IPortableDeviceContent content;
+            device.Content(out content);
+
+            // Get the properties of the object
+            IPortableDeviceProperties properties;
+            content.Properties(out properties);
+
+            if (parentPersistentID == null)
+            {
+                parentPersistentID = "DEVICE";
+            }
+
+            // Enumerate the items contained by the current object
+            IEnumPortableDeviceObjectIDs objectIds;
+            content.EnumObjects(0, parentPersistentID, null, out objectIds);
+            
+            uint fetched = 0;
+            do
+            {
+                string objectId;
+
+                objectIds.Next(1, out objectId, ref fetched);
+                if (fetched > 0)
+                {
+                    if (objectId.Equals(persistentID))
+                    {
+
+                        return (PortableDeviceFolder)WrapObject(properties, objectId);
+                    }
+                    
+
+                }
+            } while (fetched > 0);
+
+            return null;
+        }
         
         private static void EnumerateContentsRecursive(ref IPortableDeviceContent content,
                                               PortableDeviceFolder parent)
@@ -288,6 +328,7 @@ namespace WindowsPortableDevicesLib.Domain
         private static void EnumerateContentsOfParent(ref IPortableDeviceContent content,
                                               PortableDeviceFolder parent)
         {
+                        
             // Get the properties of the object
             IPortableDeviceProperties properties;
             content.Properties(out properties);
