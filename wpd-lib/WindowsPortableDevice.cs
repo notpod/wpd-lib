@@ -254,7 +254,47 @@ namespace WindowsPortableDevicesLib.Domain
             return toString;
         }
 
-        public PortableDeviceFolder GetFolder(string parentPersistentID, string persistentID)
+        public PortableDeviceObject GetObject(string parentID, string objectID)
+        {
+
+            IPortableDeviceContent content;
+            device.Content(out content);
+
+            // Get the properties of the object
+            IPortableDeviceProperties properties;
+            content.Properties(out properties);
+
+            if (parentID == null || parentID.Length == 0)
+            {
+                parentID = DeviceID;
+            }
+
+            // Enumerate the items contained by the current object
+            IEnumPortableDeviceObjectIDs objectIds;
+            content.EnumObjects(0, parentID, null, out objectIds);
+            
+            uint fetched = 0;
+            do
+            {
+                string objectId;
+
+                objectIds.Next(1, out objectId, ref fetched);
+                if (fetched > 0)
+                {
+                    if (objectId.Equals(objectID))
+                    {
+
+                        return WrapObject(properties, objectId);
+                    }
+                    
+
+                }
+            } while (fetched > 0);
+
+            return null;
+        }
+
+        public string CreateFolder(string parentPersistentID, string folderName)
         {
 
             IPortableDeviceContent content;
@@ -269,29 +309,17 @@ namespace WindowsPortableDevicesLib.Domain
                 parentPersistentID = "DEVICE";
             }
 
-            // Enumerate the items contained by the current object
-            IEnumPortableDeviceObjectIDs objectIds;
-            content.EnumObjects(0, parentPersistentID, null, out objectIds);
+            IPortableDeviceValues createFolderValues = new PortableDeviceTypesLib.PortableDeviceValues() as IPortableDeviceValues;
+            createFolderValues.SetStringValue(DevicePropertyKeys.WPD_OBJECT_PARENT_ID, parentPersistentID);
+            createFolderValues.SetStringValue(DevicePropertyKeys.WPD_OBJECT_NAME, folderName);
+            createFolderValues.SetStringValue(DevicePropertyKeys.WPD_OBJECT_ORIGINAL_FILE_NAME, folderName);
+            createFolderValues.SetGuidValue(DevicePropertyKeys.WPD_OBJECT_CONTENT_TYPE, DeviceGUIDS.WPD_CONTENT_TYPE_FOLDER);
+            createFolderValues.SetGuidValue(DevicePropertyKeys.WPD_OBJECT_FORMAT, DeviceGUIDS.WPD_OBJECT_FORMAT_PROPERTIES_ONLY);
+
+            string newFolderId = "";
+            content.CreateObjectWithPropertiesOnly(createFolderValues, ref newFolderId);
             
-            uint fetched = 0;
-            do
-            {
-                string objectId;
-
-                objectIds.Next(1, out objectId, ref fetched);
-                if (fetched > 0)
-                {
-                    if (objectId.Equals(persistentID))
-                    {
-
-                        return (PortableDeviceFolder)WrapObject(properties, objectId);
-                    }
-                    
-
-                }
-            } while (fetched > 0);
-
-            return null;
+            return newFolderId;
         }
         
         private static void EnumerateContentsRecursive(ref IPortableDeviceContent content,
@@ -300,6 +328,8 @@ namespace WindowsPortableDevicesLib.Domain
             // Get the properties of the object
             IPortableDeviceProperties properties;
             content.Properties(out properties);
+
+            
 
             // Enumerate the items contained by the current object
             IEnumPortableDeviceObjectIDs objectIds;
