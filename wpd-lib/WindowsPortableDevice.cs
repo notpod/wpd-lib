@@ -15,13 +15,13 @@ using WindowsPortableDevicesLib;
 
 namespace WindowsPortableDevicesLib.Domain
 {
-    
+
     public class WindowsPortableDevice
     {
         private ILog l = LogManager.GetLogger(typeof(WindowsPortableDevice));
-        
+
         private PortableDeviceClass device;
-        
+
         public WindowsPortableDevice(string deviceID)
         {
             this.DeviceID = deviceID;
@@ -32,7 +32,7 @@ namespace WindowsPortableDevicesLib.Domain
         public string FriendlyName { get; set; }
 
         public int DeviceType { get; set; }
-        
+
         void ValidateConnection()
         {
             if (device == null)
@@ -40,15 +40,16 @@ namespace WindowsPortableDevicesLib.Domain
                 throw new InvalidOperationException("Not connected to device.");
             }
         }
-        
+
         public void Connect()
         {
-            if (this.device != null) {
-                
+            if (this.device != null)
+            {
+
                 l.Debug("Device is already connected.");
                 return;
             }
-            var clientInfo = (IPortableDeviceValues) new PortableDeviceTypesLib.PortableDeviceValuesClass();
+            var clientInfo = (IPortableDeviceValues)new PortableDeviceTypesLib.PortableDeviceValuesClass();
             device = new PortableDeviceClass();
             device.Open(DeviceID, clientInfo);
 
@@ -88,31 +89,32 @@ namespace WindowsPortableDevicesLib.Domain
 
         public void Disconnect()
         {
-            if (!(this.device == null)) {
-                
+            if (!(this.device == null))
+            {
+
                 l.Debug("Device is not connected.");
                 return;
             }
             this.device.Close();
             this.device = null;
         }
-        
+
         public PortableDeviceFolder GetContents(PortableDeviceFolder parent = null)
         {
             ValidateConnection();
             var root = new PortableDeviceFolder("DEVICE", "DEVICE");
             if (parent != null)
             {
-                root = parent;    
+                root = parent;
             }
-            
+
             IPortableDeviceContent content;
             device.Content(out content);
             EnumerateContentsOfParent(ref content, root);
 
             return root;
         }
-                        
+
         public void GetFile(PortableDeviceFile file, string saveToPath)
         {
             IPortableDeviceContent content;
@@ -120,7 +122,7 @@ namespace WindowsPortableDevicesLib.Domain
 
             IPortableDeviceResources resources;
             content.Transfer(out resources);
-            
+
             PortableDeviceApiLib.IStream wpdStream;
             uint optimalTransferSize = 0;
 
@@ -133,12 +135,12 @@ namespace WindowsPortableDevicesLib.Domain
                                 out wpdStream);
 
             System.Runtime.InteropServices.ComTypes.IStream sourceStream =
-                (System.Runtime.InteropServices.ComTypes.IStream) wpdStream;
+                (System.Runtime.InteropServices.ComTypes.IStream)wpdStream;
 
             var filename = Path.GetFileName(file.Id);
             FileStream targetStream = new FileStream(Path.Combine(saveToPath, filename),
                                                      FileMode.Create, FileAccess.Write);
-            
+
             unsafe
             {
                 var buffer = new byte[1024];
@@ -152,16 +154,17 @@ namespace WindowsPortableDevicesLib.Domain
                 targetStream.Close();
             }
         }
-        
+
         public void TransferContentToDevice(string fileName,
-                                            string parentObjectId) {
-            
+                                            string parentObjectId)
+        {
+
             IPortableDeviceContent content;
             device.Content(out content);
-            
+
             IPortableDeviceValues values =
                 GetRequiredPropertiesForContentType(fileName, parentObjectId);
-            
+
             PortableDeviceApiLib.IStream tempStream;
             uint optimalTransferSizeBytes = 0;
             content.CreateObjectWithPropertiesAndData(
@@ -169,10 +172,10 @@ namespace WindowsPortableDevicesLib.Domain
                 out tempStream,
                 ref optimalTransferSizeBytes,
                 null);
-            
+
             System.Runtime.InteropServices.ComTypes.IStream targetStream =
-                (System.Runtime.InteropServices.ComTypes.IStream) tempStream;
-            
+                (System.Runtime.InteropServices.ComTypes.IStream)tempStream;
+
             try
             {
                 using (var sourceStream =
@@ -185,8 +188,11 @@ namespace WindowsPortableDevicesLib.Domain
                         bytesRead = sourceStream.Read(
                             buffer, 0, (int)optimalTransferSizeBytes);
                         IntPtr pcbWritten = IntPtr.Zero;
-                        targetStream.Write(
-                            buffer, (int)optimalTransferSizeBytes, pcbWritten);
+                        if (bytesRead < (int)optimalTransferSizeBytes)
+                            targetStream.Write(buffer, bytesRead, pcbWritten);
+                        else
+                            targetStream.Write(buffer, (int)optimalTransferSizeBytes, pcbWritten);
+
                     } while (bytesRead > 0);
                 }
                 targetStream.Commit(0);
@@ -196,19 +202,19 @@ namespace WindowsPortableDevicesLib.Domain
                 System.Runtime.InteropServices.Marshal.ReleaseComObject(tempStream);
             }
         }
-        
+
         private IPortableDeviceValues GetRequiredPropertiesForContentType(
             string fileName,
             string parentObjectId)
         {
             IPortableDeviceValues values =
                 new PortableDeviceTypesLib.PortableDeviceValues() as IPortableDeviceValues;
-            
+
             var WPD_OBJECT_PARENT_ID = new _tagpropertykey();
             WPD_OBJECT_PARENT_ID.fmtid =
                 new Guid(0xEF6B490D, 0x5CD8, 0x437A, 0xAF, 0xFC,
                          0xDA, 0x8B, 0x60, 0xEE, 0x4A, 0x3C);
-            WPD_OBJECT_PARENT_ID.pid = 3 ;
+            WPD_OBJECT_PARENT_ID.pid = 3;
             values.SetStringValue(ref WPD_OBJECT_PARENT_ID, parentObjectId);
 
             FileInfo fileInfo = new FileInfo(fileName);
@@ -217,7 +223,7 @@ namespace WindowsPortableDevicesLib.Domain
                 new Guid(0xEF6B490D, 0x5CD8, 0x437A, 0xAF, 0xFC,
                          0xDA, 0x8B, 0x60, 0xEE, 0x4A, 0x3C);
             WPD_OBJECT_SIZE.pid = 11;
-            values.SetUnsignedLargeIntegerValue(WPD_OBJECT_SIZE, (ulong) fileInfo.Length);
+            values.SetUnsignedLargeIntegerValue(WPD_OBJECT_SIZE, (ulong)fileInfo.Length);
 
             var WPD_OBJECT_ORIGINAL_FILE_NAME = new _tagpropertykey();
             WPD_OBJECT_ORIGINAL_FILE_NAME.fmtid =
@@ -232,25 +238,28 @@ namespace WindowsPortableDevicesLib.Domain
                          0xDA, 0x8B, 0x60, 0xEE, 0x4A, 0x3C);
             WPD_OBJECT_NAME.pid = 4;
             values.SetStringValue(WPD_OBJECT_NAME, Path.GetFileName(fileName));
-            
+
             return values;
         }
-        
-        public override string ToString() {
-            
+
+        public override string ToString()
+        {
+
             bool shouldDisconnect = false;
-            if(device == null) {
-            
+            if (device == null)
+            {
+
                 Connect();
                 shouldDisconnect = true;
             }
             string toString = FriendlyName;
-            
-            if(shouldDisconnect) {
-                
+
+            if (shouldDisconnect)
+            {
+
                 Disconnect();
             }
-            
+
             return toString;
         }
 
@@ -272,7 +281,7 @@ namespace WindowsPortableDevicesLib.Domain
             // Enumerate the items contained by the current object
             IEnumPortableDeviceObjectIDs objectIds;
             content.EnumObjects(0, parentID, null, out objectIds);
-            
+
             uint fetched = 0;
             do
             {
@@ -284,9 +293,15 @@ namespace WindowsPortableDevicesLib.Domain
                     if (objectId.Equals(objectID))
                     {
 
-                        return WrapObject(properties, objectId);
+                        PortableDeviceObject deviceObject = WrapObject(properties, objectId);
+                        if (deviceObject.GetType() == typeof(PortableDeviceFolder))
+                        {
+                            EnumerateContentsOfParent(ref content, (PortableDeviceFolder)deviceObject);
+
+                        }
+                        return deviceObject;
                     }
-                    
+
 
                 }
             } while (fetched > 0);
@@ -318,10 +333,10 @@ namespace WindowsPortableDevicesLib.Domain
 
             string newFolderId = "";
             content.CreateObjectWithPropertiesOnly(createFolderValues, ref newFolderId);
-            
+
             return newFolderId;
         }
-        
+
         private static void EnumerateContentsRecursive(ref IPortableDeviceContent content,
                                               PortableDeviceFolder parent)
         {
@@ -329,7 +344,7 @@ namespace WindowsPortableDevicesLib.Domain
             IPortableDeviceProperties properties;
             content.Properties(out properties);
 
-            
+
 
             // Enumerate the items contained by the current object
             IEnumPortableDeviceObjectIDs objectIds;
@@ -358,7 +373,7 @@ namespace WindowsPortableDevicesLib.Domain
         private static void EnumerateContentsOfParent(ref IPortableDeviceContent content,
                                               PortableDeviceFolder parent)
         {
-                        
+
             // Get the properties of the object
             IPortableDeviceProperties properties;
             content.Properties(out properties);
@@ -382,7 +397,7 @@ namespace WindowsPortableDevicesLib.Domain
                 }
             } while (fetched > 0);
         }
-        
+
         private static PortableDeviceObject WrapObject(IPortableDeviceProperties properties,
                                                        string objectId)
         {
@@ -412,26 +427,28 @@ namespace WindowsPortableDevicesLib.Domain
                                       0xE1, 0x77, 0x05, 0xA0, 0x5F, 0x85);
             var functionalType = new Guid(0x99ED0160, 0x17FF, 0x4C44, 0x9D, 0x98,
                                           0x1D, 0x7A, 0x6F, 0x94, 0x19, 0x21);
-            
+
             string uniqueID;
             values.GetStringValue(DevicePropertyKeys.WPD_OBJECT_PERSISTENT_UNIQUE_ID, out uniqueID);
-                        
+
             PortableDeviceObject deviceObject = null;
 
-            if (contentType == folderType  || contentType == functionalType)
+            if (contentType == folderType || contentType == functionalType)
             {
                 deviceObject = new PortableDeviceFolder(objectId, name);
-                
-            } else {
+
+            }
+            else
+            {
                 deviceObject = new PortableDeviceFile(objectId, name);
             }
-            
+
             deviceObject.PersistentId = uniqueID;
-            
+
             return deviceObject;
-            
+
         }
 
-        
+
     }
 }
