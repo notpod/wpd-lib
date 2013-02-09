@@ -189,9 +189,13 @@ namespace WindowsPortableDevicesLib.Domain
                             buffer, 0, (int)optimalTransferSizeBytes);
                         IntPtr pcbWritten = IntPtr.Zero;
                         if (bytesRead < (int)optimalTransferSizeBytes)
+                        {
                             targetStream.Write(buffer, bytesRead, pcbWritten);
+                        }
                         else
+                        {
                             targetStream.Write(buffer, (int)optimalTransferSizeBytes, pcbWritten);
+                        }
 
                     } while (bytesRead > 0);
                 }
@@ -238,6 +242,8 @@ namespace WindowsPortableDevicesLib.Domain
                          0xDA, 0x8B, 0x60, 0xEE, 0x4A, 0x3C);
             WPD_OBJECT_NAME.pid = 4;
             values.SetStringValue(WPD_OBJECT_NAME, Path.GetFileName(fileName));
+
+            values.SetBoolValue(DevicePropertyKeys.WPD_OBJECT_CAN_DELETE, 1);
 
             return values;
         }
@@ -321,7 +327,7 @@ namespace WindowsPortableDevicesLib.Domain
 
             if (parentPersistentID == null)
             {
-                parentPersistentID = "DEVICE";
+                parentPersistentID = DeviceID;
             }
 
             IPortableDeviceValues createFolderValues = new PortableDeviceTypesLib.PortableDeviceValues() as IPortableDeviceValues;
